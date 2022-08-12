@@ -1,4 +1,4 @@
-//Importing modules 
+//Importing modules
 import { genSalt, hash } from 'bcrypt' //for encrypting the password
 import { basename } from 'path' //for path manipulations
 import jwt from 'jsonwebtoken' //JSON WEB TOKEN for generating the access token
@@ -43,7 +43,9 @@ const register = async (req, res) => {
       registerationNumber === null ||
       registerationNumber.trim().length === 0
     )
-      return res.status(400).json({ message: 'Registeration number is required ' })
+      return res
+        .status(400)
+        .json({ message: 'Registeration number is required ' })
 
     //Validation for password
     if (
@@ -60,22 +62,22 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Password is weak' })
 
     //Checking if phone number exists
-    const phoneNumberCount = await Users.find({ phoneNumber }).countDocuments()
-    if (phoneNumberCount > 0)
+    const phoneNumberExists = await Users.exists({ phoneNumber })
+    if (phoneNumberExists)
       return res
         .status(409)
         .json({ message: 'Phone number already already exists' })
 
     //Checking if email exists
-    const emailCount = await Users.find({ email }).countDocuments()
-    if (emailCount > 0)
+    const emailExists = await Users.exists({ email })
+    if (emailExists > 0)
       return res.status(409).json({ message: 'Email already exists ' })
 
     //Checking if registeration number exists
-    const registerationNumberCount = await Users.find({
+    const registerationNumberExists = await Users.exists({
       registerationNumber
-    }).countDocuments()
-    if (registerationNumberCount > 0)
+    })
+    if (registerationNumberExists)
       return res
         .status(409)
         .json({ message: 'Registeration number already exists' })
@@ -85,9 +87,9 @@ const register = async (req, res) => {
     const hashedPassword = await hash(password, salt)
 
     //Setting the image url
-    const imageURL = `${req.protocol}://${req.hostname}:${process.env.PORT}/uploads/${basename(
-      filePath
-    )}`
+    const imageURL = `${req.protocol}://${req.hostname}:${
+      process.env.PORT
+    }/uploads/${basename(filePath)}`
 
     //Saving the user
     const user = Users({
@@ -98,13 +100,16 @@ const register = async (req, res) => {
       password: hashedPassword,
       carImage: imageURL
     })
-    const { _doc } = await user.save();
-    
+    const { _doc } = await user.save()
+
     //Generating the access token
-    const accessToken = jwt.sign({ id: _doc._id }, process.env.ACCESS_TOKEN_SECRET);
+    const accessToken = jwt.sign(
+      { id: _doc._id },
+      process.env.ACCESS_TOKEN_SECRET
+    )
 
     //Deleting the hash password feild in the saved object
-    delete _doc.password;
+    delete _doc.password
 
     const data = { ..._doc, accessToken }
 

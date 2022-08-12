@@ -13,10 +13,10 @@ const login = async (req, res) => {
       phoneNumber === null ||
       phoneNumber.trim().length === 0
     )
-      return res.sendStatus(402).json({ message: 'Phone number is required' })
+      return res.status(402).json({ message: 'Phone number is required' })
 
-    if (password.trim().length === 10)
-      return res.status(200).json({ message: 'Invalid phone number' })
+    if (phoneNumber.trim().length !== 10)
+      return res.status(402).json({ message: 'Invalid phone number' })
 
     //Validating the password
     if (
@@ -24,16 +24,16 @@ const login = async (req, res) => {
       password === null ||
       password.trim().length === 0
     )
-      return res.status(402).json({ message: 'Password is required' })
+      return res.status(403).json({ message: 'Password is required' })
 
     const user = await Users.findOne({ phoneNumber })
 
     if (!user)
-      res.status(404).json({ message: 'Phone number is not registered' })
+      return res.status(404).json({ message: 'Phone number is not registered' })
 
     const passwordVerify = await compare(password, user.password)
     if (!passwordVerify)
-      res.status(402).json({ message: 'password is incorrect ' })
+      return res.status(403).json({ message: 'password is incorrect ' })
 
     const accessToken = jwt.sign(
       { id: user._id },
@@ -46,7 +46,7 @@ const login = async (req, res) => {
 
     const data = { ..._doc, accessToken }
 
-    return res.status(200).json({ data })
+    return res.status(200).json(data)
   } catch (error) {
     console.log(`${error}`)
     return res.sendStatus(500)

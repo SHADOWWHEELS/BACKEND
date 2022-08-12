@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import sys
 import os
 import cv2
@@ -25,6 +26,7 @@ image2 = image.copy()
 cv2.drawContours(image2,cnts,-1,(0,255,0),3)
 
 
+flag = 0;
 i=7
 for c in cnts:
         perimeter = cv2.arcLength(c, True)
@@ -35,11 +37,12 @@ for c in cnts:
                 new_img=image[y:y+h,x:x+w]
                 cv2.imwrite(sys.argv[1].split(".")[0] + "NAMEPLATE" + "." + sys.argv[1].split(".")[1], new_img)
                 i+=1
+                flag = 1
                 break
 
-cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 3)
-
-Cropped_loc = sys.argv[1].split(".")[0] + "NAMEPLATE" + "." + sys.argv[1].split(".")[1]
-plate = pytesseract.image_to_string(Cropped_loc, lang='eng')
-os.remove(Cropped_loc);
-print(plate)
+        # cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 3)
+if flag == 1:
+        Cropped_loc = sys.argv[1].split(".")[0] + "NAMEPLATE" + "." + sys.argv[1].split(".")[1]
+        plate = pytesseract.image_to_string(Cropped_loc, lang='eng')
+        os.remove(Cropped_loc);
+        print(plate)

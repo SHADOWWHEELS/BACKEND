@@ -31,7 +31,7 @@ const io = new Server(server)
 const port = process.env.PORT || 5000
 
 //Middlewares for expresss -> things which server does after recieving a request and returning a response
-app.use(express.json({ limit: "5mb" })) //Allowing only 5 mb of data
+app.use(express.json({ limit: "10mb" })) //Allowing only 5 mb of data
 app.use("/uploads", express.static(join(__dirname, "/uploads"))) //serving the files on uploads statically
 app.use("/api/auth", authRoute); //enabling the auth route
 app.use("/api/tracking", trackingRoute); //enabling the tracking route
